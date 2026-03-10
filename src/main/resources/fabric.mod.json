@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "smollib",
+	"version": "${version}",
+	"name": "SmolLib",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/smollib/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+          "net.midget807.smollib.SmolLibMain"
+		],
+        "client": [
+          "net.midget807.smollib.SmolLibClient"
+        ],
+		"fabric-datagen": [
+			"net.midget807.smollib.SmolLibDataGenerator"
+		]
+	},
+	"mixins": [
+		"smollib.mixins.json"
+	],
+    "accessWidener": "smollib.accesswidener",
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
