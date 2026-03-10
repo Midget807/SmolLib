@@ -2,7 +2,6 @@ package net.midget807.smollib.item;
 
 import net.midget807.smollib.rendering.ShapeRenderer;
 import net.midget807.smollib.rendering.manager.SquareRendererManager;
-import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -36,7 +35,7 @@ public class DebuggerItem extends Item {
         } else {
             if (world.isClient) {
                 Vec3d origin = player.getPos();
-                ShapeRenderer.renderSquare(origin, Direction.UP, 100, 2, DyedColorComponent.DEFAULT_COLOR);
+                ShapeRenderer.renderSquare(origin, Direction.UP, 100, 2, 0xff0000);
                 return TypedActionResult.success(itemStack);
             } else {
 

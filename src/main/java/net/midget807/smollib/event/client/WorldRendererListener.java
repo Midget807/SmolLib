@@ -50,7 +50,8 @@ public class WorldRendererListener {
             RenderSystem.enablePolygonOffset();
             RenderSystem.disableCull();
 
-            BufferBuilder bufferBuilder = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+            BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+            //bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
             double smallestZ = Math.max(MathHelper.floor(camZ - clampedViewDistance), squareRender.getNorthEdge());
             double largestZ = Math.min(MathHelper.ceil(camZ + clampedViewDistance), squareRender.getSouthEdge());

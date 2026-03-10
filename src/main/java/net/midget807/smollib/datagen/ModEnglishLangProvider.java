@@ -9,11 +9,11 @@ import java.util.concurrent.CompletableFuture;
 
 public class ModEnglishLangProvider extends FabricLanguageProvider {
     public ModEnglishLangProvider(FabricDataOutput dataOutput, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
-        super(dataOutput,"en_us", registryLookup);
+        super(dataOutput,"en_us");
     }
 
     @Override
-    public void generateTranslations(RegistryWrapper.WrapperLookup wrapperLookup, TranslationBuilder translationBuilder) {
+    public void generateTranslations(TranslationBuilder translationBuilder) {
         translationBuilder.add(ModItems.Debugger, "Debugger");
     }
 }

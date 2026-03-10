@@ -5,7 +5,7 @@
 	"name": "SmolLib",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
-		"Me!"
+		"Midget807"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
@@ -31,7 +31,7 @@
     "accessWidener": "smollib.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.18.4",
-		"minecraft": "~1.21.1",
+		"minecraft": "~1.20.1",
 		"java": ">=21",
 		"fabric-api": "*"
 	}
