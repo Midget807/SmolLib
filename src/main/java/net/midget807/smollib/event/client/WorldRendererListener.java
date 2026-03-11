@@ -9,24 +9,33 @@ import net.midget807.smollib.rendering.manager.SquareRendererManager;
 import net.midget807.smollib.util.ModTextureIds;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.MathHelper;
 
 public class WorldRendererListener {
     public static void execute() {
-        WorldRenderEvents.END.register(context -> {
+        WorldRenderEvents.LAST.register(context -> {
             MinecraftClient client = MinecraftClient.getInstance();
             ClientWorld world = client.world;
             Camera camera = context.camera();
 
             if (world != null) {
                 SquareRendererManager.tick();
-                SquareRendererManager.get().forEach(squareRender -> renderSquares(context, world, client, camera, squareRender));
+                SquareRendererManager.get().forEach(squareRender -> renderSquaresOld(context, world, client, camera, squareRender));
             }
         });
     }
 
-    private static void renderSquares(WorldRenderContext context, ClientWorld world, MinecraftClient client, Camera camera, SquareRender squareRender) {
+    private static void renderSquares(WorldRenderContext context, ClientWorld world, MinecraftClient client, Camera camera, SquareRender square) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR_LIGHT);
+        MatrixStack matrices;
+
+    }
+
+    private static void renderSquaresOld(WorldRenderContext context, ClientWorld world, MinecraftClient client, Camera camera, SquareRender squareRender) {
         double clampedViewDistance = client.options.getClampedViewDistance() * 16;
         if (isNotBeyondRenderDistance(camera, squareRender, clampedViewDistance)) {
             double relativeDistanceToEdge = 1.0 - squareRender.getDistanceRelativeToEdge(camera.getPos().x, camera.getPos().y, camera.getPos().z);
