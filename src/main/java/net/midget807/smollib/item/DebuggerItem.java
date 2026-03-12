@@ -1,6 +1,7 @@
 package net.midget807.smollib.item;
 
 import net.midget807.smollib.rendering.ShapeRenderer;
+import net.midget807.smollib.rendering.manager.CubeRendererManager;
 import net.midget807.smollib.rendering.manager.SquareRendererManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -34,8 +35,9 @@ public class DebuggerItem extends Item {
 
         } else {
             if (world.isClient) {
-                Vec3d origin = player.getPos();
-                ShapeRenderer.renderSquare(origin, Direction.UP, 100, 2, 0xff0000);
+                final Vec3d origin = new Vec3d(0.0, -55.0, 0.0);
+                //ShapeRenderer.renderSquare(origin, Direction.SOUTH, 200, 2, 0xff0000);
+                ShapeRenderer.renderCube(origin, 200, 4, 0xff0000);
                 return TypedActionResult.success(itemStack);
             } else {
 
@@ -48,7 +50,8 @@ public class DebuggerItem extends Item {
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, world, entity, slot, selected);
         if (entity instanceof PlayerEntity player) {
-            player.sendMessage(Text.literal("No squares: " + SquareRendererManager.get().size()), true);
+            //player.sendMessage(Text.literal("No. shape: " + SquareRendererManager.get().size()), true);
+            player.sendMessage(Text.literal("No. shape: " + CubeRendererManager.get().size()), true);
         }
     }
 
