@@ -24,6 +24,10 @@ public class CubeRender {
         this.maxAge = maxAge;
     }
 
+    public static CubeRender createSimple(Vec3d origin, int maxAge, int size, int color) {
+        return new CubeRender(origin, maxAge, size, color);
+    }
+
     public double getSouthEdge() {
         return MathHelper.clamp(this.origin.z + this.size / 2.0, -MAX_RADIUS, MAX_RADIUS);
     }

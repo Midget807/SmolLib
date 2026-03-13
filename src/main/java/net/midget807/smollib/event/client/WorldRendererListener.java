@@ -124,6 +124,30 @@ public class WorldRendererListener {
             bufferBuilder.vertex(transformation, (float) (cube.getWestEdge() - camX), (float) (cube.getUpEdge() - camY), (float) (cube.getSouthEdge() - camZ)).texture(0, 1).next();
 
 
+            //Render West
+            bufferBuilder.vertex(transformation, (float) (cube.getWestEdge() - camX), (float) (cube.getUpEdge() - camY), (float) (cube.getNorthEdge() - camZ)).texture(1, 0).next();
+            bufferBuilder.vertex(transformation, (float) (cube.getWestEdge() - camX), (float) (cube.getDownEdge() - camY), (float) (cube.getNorthEdge() - camZ)).texture(1, 1).next();
+            bufferBuilder.vertex(transformation, (float) (cube.getWestEdge() - camX), (float) (cube.getDownEdge() - camY), (float) (cube.getSouthEdge() - camZ)).texture(0, 1).next();
+            bufferBuilder.vertex(transformation, (float) (cube.getWestEdge() - camX), (float) (cube.getUpEdge() - camY), (float) (cube.getSouthEdge() - camZ)).texture(0, 0).next();
+            //Render East
+            bufferBuilder.vertex(transformation, (float) (cube.getEastEdge() - camX), (float) (cube.getUpEdge() - camY), (float) (cube.getNorthEdge() - camZ)).texture(1, 0).next();
+            bufferBuilder.vertex(transformation, (float) (cube.getEastEdge() - camX), (float) (cube.getDownEdge() - camY), (float) (cube.getNorthEdge() - camZ)).texture(1, 1).next();
+            bufferBuilder.vertex(transformation, (float) (cube.getEastEdge() - camX), (float) (cube.getDownEdge() - camY), (float) (cube.getSouthEdge() - camZ)).texture(0, 1).next();
+            bufferBuilder.vertex(transformation, (float) (cube.getEastEdge() - camX), (float) (cube.getUpEdge() - camY), (float) (cube.getSouthEdge() - camZ)).texture(0, 0).next();
+
+
+            //Render North
+            bufferBuilder.vertex(transformation, (float) (cube.getWestEdge() - camX), (float) (cube.getUpEdge() - camY), (float) (cube.getNorthEdge() - camZ)).texture(0, 0).next();
+            bufferBuilder.vertex(transformation, (float) (cube.getEastEdge() - camX), (float) (cube.getUpEdge() - camY), (float) (cube.getNorthEdge() - camZ)).texture(1, 0).next();
+            bufferBuilder.vertex(transformation, (float) (cube.getEastEdge() - camX), (float) (cube.getDownEdge() - camY), (float) (cube.getNorthEdge() - camZ)).texture(1, 1).next();
+            bufferBuilder.vertex(transformation, (float) (cube.getWestEdge() - camX), (float) (cube.getDownEdge() - camY), (float) (cube.getNorthEdge() - camZ)).texture(0, 1).next();
+            //Render South
+            bufferBuilder.vertex(transformation, (float) (cube.getWestEdge() - camX), (float) (cube.getUpEdge() - camY), (float) (cube.getSouthEdge() - camZ)).texture(0, 0).next();
+            bufferBuilder.vertex(transformation, (float) (cube.getEastEdge() - camX), (float) (cube.getUpEdge() - camY), (float) (cube.getSouthEdge() - camZ)).texture(1, 0).next();
+            bufferBuilder.vertex(transformation, (float) (cube.getEastEdge() - camX), (float) (cube.getDownEdge() - camY), (float) (cube.getSouthEdge() - camZ)).texture(1, 1).next();
+            bufferBuilder.vertex(transformation, (float) (cube.getWestEdge() - camX), (float) (cube.getDownEdge() - camY), (float) (cube.getSouthEdge() - camZ)).texture(0, 1).next();
+
+
 
             BufferBuilder.BuiltBuffer builtBuffer = bufferBuilder.end();
             CubeRendererManager.cubeBuffer.bind();
