@@ -13,6 +13,7 @@ import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
@@ -192,6 +193,16 @@ public class WorldRendererListener {
 
             bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 
+            double smallestX = Math.max(MathHelper.floor(camX - viewDistance), square.getWestEdge());
+            double largestX = Math.min(MathHelper.ceil(camX + viewDistance), square.getEastEdge());
+            double smallestY = Math.max(MathHelper.floor(camY - viewDistance), square.getDownEdge());
+            double largestY = Math.min(MathHelper.ceil(camY + viewDistance), square.getUpEdge());
+            double smallestZ = Math.max(MathHelper.floor(camZ - viewDistance), square.getNorthEdge());
+            double largestZ = Math.min(MathHelper.ceil(camZ + viewDistance), square.getSouthEdge());
+            float xIterator = (MathHelper.floor(smallestX) & 1) * 0.5f;
+            float yIterator = (MathHelper.floor(smallestY) & 1) * 0.5f;
+            float zIterator = (MathHelper.floor(smallestZ) & 1) * 0.5f;
+
             switch (square.direction) {
                 case EAST: {
                     bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getUpEdge() - camY), (float) (square.getNorthEdge() - camZ)).texture(1, 0).next();
@@ -208,17 +219,22 @@ public class WorldRendererListener {
                     break;
                 }
                 case UP: {
-                    float textureSizeIterator = 0;
-                    for (float xStart = (float) square.getWestEdge(); xStart < square.getWestEdge() + square.size; xStart += square.textureSize) {
-                        float uRemainder = Math.min(square.size - textureSizeIterator, square.textureSize);
-                        for (float zStart = (float) square.getNorthEdge(); zStart < square.getNorthEdge() + square.size; zStart += square.textureSize) {
-                            float vRemainder = Math.min(square.size - textureSizeIterator, square.textureSize);
-                            bufferBuilder.vertex(transformation, (float) (xStart - camX), (float) (square.getCenterY() - camY), (float) (square.getNorthEdge() - camZ)).texture(0, 0).next();
-                            bufferBuilder.vertex(transformation, (float) (xStart + uRemainder - camX), (float) (square.getCenterY() - camY), (float) (square.getNorthEdge() - camZ)).texture(0 + uRemainder, 0).next();
-                            bufferBuilder.vertex(transformation, (float) (xStart + uRemainder - camX), (float) (square.getCenterY() - camY), (float) (square.getSouthEdge() - camZ)).texture(0 + uRemainder, 0 + vRemainder).next();
-                            bufferBuilder.vertex(transformation, (float) (xStart - camX), (float) (square.getCenterY() - camY), (float) (square.getSouthEdge() - camZ)).texture(0, 0 + vRemainder).next();
-                            textureSizeIterator += square.textureSize; //todo change to using zStart
+                    float uIterator = xIterator;
+                    float vIterator = zIterator;
+
+                    for (double i = square.getWestEdge(); i < square.getEastEdge(); i += square.textureSize) {
+                        double xRemainder = Math.min(square.textureSize, square.getEastEdge() - i);
+                        float uRemainder = (float) (xRemainder * 0.5f);
+                        for (double j = square.getNorthEdge(); j < square.getSouthEdge(); j += square.textureSize) {
+                            double zRemainder = Math.min(square.textureSize, square.getSouthEdge() - i);
+                            float vRemainder = (float) (zRemainder * 0.5f);
+                            bufferBuilder.vertex(transformation, (float) (i - camX), (float) (square.getCenterY() - camY), (float) (j - camZ)).texture(0, 0).next();
+                            bufferBuilder.vertex(transformation, (float) (i + xRemainder - camX), (float) (square.getCenterY() - camY), (float) (j - camZ)).texture(1, 0).next();
+                            bufferBuilder.vertex(transformation, (float) (i + xRemainder - camX), (float) (square.getCenterY() - camY), (float) (j + zRemainder - camZ)).texture(1, 1).next();
+                            bufferBuilder.vertex(transformation, (float) (i - camX), (float) (square.getCenterY() - camY), (float) (j + zRemainder - camZ)).texture(0, 1).next();
+
                         }
+
                     }
                     break;
                 }
