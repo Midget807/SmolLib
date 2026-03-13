@@ -36,7 +36,10 @@ public class DebuggerItem extends Item {
         } else {
             if (world.isClient) {
                 final Vec3d origin = player.getEyePos().add(player.getRotationVector().normalize().multiply(8));
-                //ShapeRenderer.renderSquare(origin, Direction.SOUTH, 200, 2, 0xff0000);
+                Vec3d square1Origin = origin.add(0, 4, 0);
+                Vec3d square2Origin = origin.add(0, 6, 0);
+                ShapeRenderer.renderSquare(square1Origin, Direction.UP, 200, 4, 0xff0000, 2.0f);
+                ShapeRenderer.renderSquare(square2Origin, Direction.UP, 200, 4, 0xff0000, 2.0f, 45.0f);
                 ShapeRenderer.renderCube(origin, 200, 4, 0xff0000);
                 return TypedActionResult.success(itemStack);
             } else {

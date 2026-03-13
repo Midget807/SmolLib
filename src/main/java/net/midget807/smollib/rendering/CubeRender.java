@@ -1,17 +1,29 @@
 package net.midget807.smollib.rendering;
 
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.List;
+
 public class CubeRender {
     public static final int MAX_RADIUS = 29999984;
+    public static final int DOWN_INDEX = 0;
+    public static final int UP_INDEX = 1;
+    public static final int WEST_INDEX = 2;
+    public static final int EAST_INDEX = 3;
+    public static final int NORTH_INDEX = 4;
+    public static final int SOUTH_INDEX = 5;
     public final Vec3d origin;
     public int age;
     public final int maxAge;
     public final int size;
     public final int color;
-    private boolean isRendered = false;
+    /*public final List<Identifier> textureList;
+    public final float textureSize;
+    public final boolean animated;
+    public final float animationAngle;*/
 
     /** If {@link #maxAge} equals -1, {@link #age} will not tick.
      *
@@ -61,10 +73,4 @@ public class CubeRender {
         return Math.min(check, dzp);
     }
 
-    public boolean isRendered() {
-        return this.isRendered;
-    }
-    public void setRendered(boolean isRendered) {
-        this.isRendered = isRendered;
-    }
 }

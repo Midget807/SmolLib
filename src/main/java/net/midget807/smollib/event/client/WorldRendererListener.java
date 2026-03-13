@@ -1,6 +1,5 @@
 package net.midget807.smollib.event.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -13,10 +12,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
@@ -32,11 +28,9 @@ public class WorldRendererListener {
 
             if (world != null) {
                 SquareRendererManager.tick();
-                SquareRendererManager.get().forEach(squareRender -> renderSquares(context, world, client, camera, squareRender));
+                SquareRendererManager.get().forEach(squareRender -> renderSquare(context, world, client, camera, squareRender));
                 CubeRendererManager.tick();
-                CubeRendererManager.get().forEach(cubeRender -> {
-                    renderCubes(context, world, client, camera, cubeRender);
-                });
+                CubeRendererManager.get().forEach(cubeRender -> renderCube(context, world, client, camera, cubeRender));
                 renderTest(context, world, client, camera);
             }
         });
@@ -88,7 +82,7 @@ public class WorldRendererListener {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    private static void renderCubes(WorldRenderContext context, ClientWorld world, MinecraftClient client, Camera camera, CubeRender cube) {
+    private static void renderCube(WorldRenderContext context, ClientWorld world, MinecraftClient client, Camera camera, CubeRender cube) {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferBuilder = tessellator.getBuffer();
         double viewDistance = client.options.getClampedViewDistance() * 16;
@@ -174,8 +168,80 @@ public class WorldRendererListener {
         }
     }
 
-    private static void renderSquares(WorldRenderContext context, ClientWorld world, MinecraftClient client, Camera camera, SquareRender square) {
+    private static void renderSquare(WorldRenderContext context, ClientWorld world, MinecraftClient client, Camera camera, SquareRender square) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferBuilder = tessellator.getBuffer();
+        double viewDistance = client.options.getClampedViewDistance() * 16;
 
+        double camX = context.camera().getPos().x;
+        double camY = context.camera().getPos().y;
+        double camZ = context.camera().getPos().z;
+
+        Matrix4f transformation = context.matrixStack().peek().getPositionMatrix();
+
+        if (isNotBeyondRenderDistance(camera, square, viewDistance)) {
+
+            RenderSystem.disableCull();
+            RenderSystem.enableBlend();
+            RenderSystem.enableDepthTest();
+
+            if (SquareRendererManager.squareBuffer != null) {
+                SquareRendererManager.squareBuffer.close();
+            }
+            SquareRendererManager.squareBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+
+            bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+
+            switch (square.getAxis()) {
+                case X: {
+                    //Render X
+                    bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getUpEdge() - camY), (float) (square.getNorthEdge() - camZ)).texture(1, 0).next();
+                    bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getDownEdge() - camY), (float) (square.getNorthEdge() - camZ)).texture(1, 1).next();
+                    bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getDownEdge() - camY), (float) (square.getSouthEdge() - camZ)).texture(0, 1).next();
+                    bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getUpEdge() - camY), (float) (square.getSouthEdge() - camZ)).texture(0, 0).next();
+                    break;
+                }
+                case Y: {
+                    //Render Y
+                    bufferBuilder.vertex(transformation, (float) (square.getWestEdge() - camX), (float) (square.getCenterY() - camY), (float) (square.getNorthEdge() - camZ)).texture(0, 0).next();
+                    bufferBuilder.vertex(transformation, (float) (square.getEastEdge() - camX), (float) (square.getCenterY() - camY), (float) (square.getNorthEdge() - camZ)).texture(1, 0).next();
+                    bufferBuilder.vertex(transformation, (float) (square.getEastEdge() - camX), (float) (square.getCenterY() - camY), (float) (square.getSouthEdge() - camZ)).texture(1, 1).next();
+                    bufferBuilder.vertex(transformation, (float) (square.getWestEdge() - camX), (float) (square.getCenterY() - camY), (float) (square.getSouthEdge() - camZ)).texture(0, 1).next();
+                    break;
+                }
+                case Z: {
+                    //Render Z
+                    bufferBuilder.vertex(transformation, (float) (square.getWestEdge() - camX), (float) (square.getUpEdge() - camY), (float) (square.getCenterZ() - camZ)).texture(0, 0).next();
+                    bufferBuilder.vertex(transformation, (float) (square.getEastEdge() - camX), (float) (square.getUpEdge() - camY), (float) (square.getCenterZ() - camZ)).texture(1, 0).next();
+                    bufferBuilder.vertex(transformation, (float) (square.getEastEdge() - camX), (float) (square.getDownEdge() - camY), (float) (square.getCenterZ() - camZ)).texture(1, 1).next();
+                    bufferBuilder.vertex(transformation, (float) (square.getWestEdge() - camX), (float) (square.getDownEdge() - camY), (float) (square.getCenterZ() - camZ)).texture(0, 1).next();
+                    break;
+                }
+            }
+            
+            BufferBuilder.BuiltBuffer builtBuffer = bufferBuilder.end();
+            SquareRendererManager.squareBuffer.bind();
+            SquareRendererManager.squareBuffer.upload(builtBuffer);
+            VertexBuffer.unbind();
+
+            RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+            /** Bit shifting hex colors into that fuckass 256^3 ratio */
+            float r = (square.color >> 16 & 0xFF) / 255.0f;
+            float g = (square.color >> 8 & 0xFF) / 255.0f;
+            float b = (square.color & 0xFF) / 255.0f;
+            RenderSystem.setShaderColor(r, g, b, 1.0f);
+            RenderSystem.setShaderTexture(0, ModTextureIds.DEBUG);
+            if (SquareRendererManager.squareBuffer != null) {
+                SquareRendererManager.squareBuffer.bind();
+                ShaderProgram shaderProgram = RenderSystem.getShader();
+                SquareRendererManager.squareBuffer.draw(RenderSystem.getModelViewStack().peek().getPositionMatrix(), RenderSystem.getProjectionMatrix(), shaderProgram);
+            }
+
+            RenderSystem.enableCull();
+            RenderSystem.disableBlend();
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        }
     }
 
 

@@ -12,26 +12,43 @@ public class SquareRender {
     public final int maxAge;
     public final int size;
     public final int color;
+    public final float textureSize;
+    public final boolean animated;
+    public final float animationAngle;
 
     /** If {@link #maxAge} equals -1, {@link #age} will not tick.
      *
      */
-    public SquareRender(Vec3d origin, Direction direction, int maxAge, int size, int color) {
+    public SquareRender(Vec3d origin, Direction direction, int maxAge, int size, int color, float textureSize, float animationAngle) {
         this.origin = origin;
-        this.direction = getDirectionPair(direction);
+        this.direction = direction;
         this.size = size;
         this.color = color;
+        this.textureSize = textureSize;
+        this.animationAngle = animationAngle;
+        this.animated = animationAngle >= 0;
+        this.age = 0;
+        this.maxAge = maxAge;
+    }
+    public SquareRender(Vec3d origin, Direction direction, int maxAge, int size, int color, float textureSize) {
+        this.origin = origin;
+        this.direction = direction;
+        this.size = size;
+        this.color = color;
+        this.textureSize = textureSize;
+        this.animationAngle = -1.0f;
+        this.animated = false;
         this.age = 0;
         this.maxAge = maxAge;
     }
 
-    private Direction getDirectionPair(Direction direction) {
-        if (direction == Direction.UP || direction == Direction.DOWN) {
-            return Direction.UP;
-        } else if (direction == Direction.EAST || direction == Direction.WEST) {
-            return Direction.EAST;
+    public Direction.Axis getAxis() {
+        if (this.direction == Direction.UP || this.direction == Direction.DOWN) {
+            return Direction.Axis.Y;
+        } else if (this.direction == Direction.EAST || this.direction == Direction.WEST) {
+            return Direction.Axis.X;
         } else {
-            return Direction.SOUTH;
+            return Direction.Axis.Z;
         }
     }
 
@@ -52,6 +69,16 @@ public class SquareRender {
     }
     public double getDownEdge() {
         return MathHelper.clamp(this.origin.y - this.size / 2.0, -MAX_RADIUS, MAX_RADIUS);
+    }
+
+    public double getCenterX() {
+        return this.origin.x;
+    }
+    public double getCenterY() {
+        return this.origin.y;
+    }
+    public double getCenterZ() {
+        return this.origin.z;
     }
 
     public double getDistanceRelativeToEdge(double x, double y, double z) {
