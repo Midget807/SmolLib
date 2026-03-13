@@ -35,7 +35,7 @@ public class DebuggerItem extends Item {
 
         } else {
             if (world.isClient) {
-                final Vec3d origin = new Vec3d(0.0, -55.0, 0.0);
+                final Vec3d origin = player.getEyePos().add(player.getRotationVector().normalize().multiply(8));
                 //ShapeRenderer.renderSquare(origin, Direction.SOUTH, 200, 2, 0xff0000);
                 ShapeRenderer.renderCube(origin, 200, 4, 0xff0000);
                 return TypedActionResult.success(itemStack);
