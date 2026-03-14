@@ -205,13 +205,45 @@ public class WorldRendererListener {
 
             switch (square.direction) {
                 case EAST: {
-                    bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getUpEdge() - camY), (float) (square.getNorthEdge() - camZ)).texture(1, 0).next();
-                    bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getDownEdge() - camY), (float) (square.getNorthEdge() - camZ)).texture(1, 1).next();
-                    bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getDownEdge() - camY), (float) (square.getSouthEdge() - camZ)).texture(0, 1).next();
-                    bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getUpEdge() - camY), (float) (square.getSouthEdge() - camZ)).texture(0, 0).next();
+                    for (double i = square.getDownEdge(); i < square.getUpEdge(); i += square.textureSize) {
+                        double yRemainder = Math.min(square.textureSize, square.getUpEdge() - i);
+                        float uRemainder = 1.0f;
+                        if (square.getUpEdge() - i < square.textureSize) {
+                            uRemainder = (float) ((square.getUpEdge() - i) / square.textureSize);
+                        }
+                        for (double j = square.getNorthEdge(); j < square.getSouthEdge(); j += square.textureSize) {
+                            double zRemainder = Math.min(square.textureSize, square.getSouthEdge() - j);
+                            float vRemainder = 1.0f;
+                            if (square.getSouthEdge() - j < square.textureSize) {
+                                vRemainder = (float) ((square.getSouthEdge() - j) / square.textureSize);
+                            }
+                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (i + yRemainder - camY), (float) (j - camZ)).texture(uRemainder, 0).next();
+                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (i - camY), (float) (j - camZ)).texture(uRemainder, vRemainder).next();
+                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (i - camY), (float) (j + zRemainder - camZ)).texture(0, vRemainder).next();
+                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (i + yRemainder - camY), (float) (j + zRemainder - camZ)).texture(0, 0).next();
+                        }
+                    }
                     break;
                 }
                 case WEST: {
+                    for (double i = square.getWestEdge(); i < square.getEastEdge(); i += square.textureSize) {
+                        double xRemainder = Math.min(square.textureSize, square.getEastEdge() - i);
+                        float uRemainder = 1.0f;
+                        if (square.getEastEdge() - i < square.textureSize) {
+                            uRemainder = (float) ((square.getEastEdge() - i) / square.textureSize);
+                        }
+                        for (double j = square.getNorthEdge(); j < square.getSouthEdge(); j += square.textureSize) {
+                            double zRemainder = Math.min(square.textureSize, square.getSouthEdge() - j);
+                            float vRemainder = 1.0f;
+                            if (square.getSouthEdge() - j < square.textureSize) {
+                                vRemainder = (float) ((square.getSouthEdge() - j) / square.textureSize);
+                            }
+                            bufferBuilder.vertex(transformation, (float) (i - camX), (float) (square.getCenterY() - camY), (float) (j - camZ)).texture(0, 0).next();
+                            bufferBuilder.vertex(transformation, (float) (i + xRemainder - camX), (float) (square.getCenterY() - camY), (float) (j - camZ)).texture(uRemainder, 0).next();
+                            bufferBuilder.vertex(transformation, (float) (i + xRemainder - camX), (float) (square.getCenterY() - camY), (float) (j + zRemainder - camZ)).texture(uRemainder, vRemainder).next();
+                            bufferBuilder.vertex(transformation, (float) (i - camX), (float) (square.getCenterY() - camY), (float) (j + zRemainder - camZ)).texture(0, vRemainder).next();
+                        }
+                    }
                     bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getUpEdge() - camY), (float) (square.getSouthEdge() - camZ)).texture(1, 0).next();
                     bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getDownEdge() - camY), (float) (square.getSouthEdge() - camZ)).texture(1, 1).next();
                     bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getDownEdge() - camY), (float) (square.getNorthEdge() - camZ)).texture(0, 1).next();
@@ -219,22 +251,23 @@ public class WorldRendererListener {
                     break;
                 }
                 case UP: {
-                    float uIterator = xIterator;
-                    float vIterator = zIterator;
-
                     for (double i = square.getWestEdge(); i < square.getEastEdge(); i += square.textureSize) {
                         double xRemainder = Math.min(square.textureSize, square.getEastEdge() - i);
-                        float uRemainder = (float) (xRemainder * 0.5f);
-                        for (double j = square.getNorthEdge(); j < square.getSouthEdge(); j += square.textureSize) {
-                            double zRemainder = Math.min(square.textureSize, square.getSouthEdge() - i);
-                            float vRemainder = (float) (zRemainder * 0.5f);
-                            bufferBuilder.vertex(transformation, (float) (i - camX), (float) (square.getCenterY() - camY), (float) (j - camZ)).texture(0, 0).next();
-                            bufferBuilder.vertex(transformation, (float) (i + xRemainder - camX), (float) (square.getCenterY() - camY), (float) (j - camZ)).texture(1, 0).next();
-                            bufferBuilder.vertex(transformation, (float) (i + xRemainder - camX), (float) (square.getCenterY() - camY), (float) (j + zRemainder - camZ)).texture(1, 1).next();
-                            bufferBuilder.vertex(transformation, (float) (i - camX), (float) (square.getCenterY() - camY), (float) (j + zRemainder - camZ)).texture(0, 1).next();
-
+                        float uRemainder = 1.0f;
+                        if (square.getEastEdge() - i < square.textureSize) {
+                            uRemainder = (float) ((square.getEastEdge() - i) / square.textureSize);
                         }
-
+                        for (double j = square.getNorthEdge(); j < square.getSouthEdge(); j += square.textureSize) {
+                            double zRemainder = Math.min(square.textureSize, square.getSouthEdge() - j);
+                            float vRemainder = 1.0f;
+                            if (square.getSouthEdge() - j < square.textureSize) {
+                                vRemainder = (float) ((square.getSouthEdge() - j) / square.textureSize);
+                            }
+                            bufferBuilder.vertex(transformation, (float) (i - camX), (float) (square.getCenterY() - camY), (float) (j - camZ)).texture(0, 0).next();
+                            bufferBuilder.vertex(transformation, (float) (i + xRemainder - camX), (float) (square.getCenterY() - camY), (float) (j - camZ)).texture(uRemainder, 0).next();
+                            bufferBuilder.vertex(transformation, (float) (i + xRemainder - camX), (float) (square.getCenterY() - camY), (float) (j + zRemainder - camZ)).texture(uRemainder, vRemainder).next();
+                            bufferBuilder.vertex(transformation, (float) (i - camX), (float) (square.getCenterY() - camY), (float) (j + zRemainder - camZ)).texture(0, vRemainder).next();
+                        }
                     }
                     break;
                 }
