@@ -4,9 +4,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.midget807.smollib.rendering.CubeRender;
-import net.midget807.smollib.rendering.SquareRender;
+import net.midget807.smollib.rendering.TexturedSquareRender;
 import net.midget807.smollib.rendering.manager.CubeRendererManager;
-import net.midget807.smollib.rendering.manager.SquareRendererManager;
+import net.midget807.smollib.rendering.manager.TexturedSquareRendererManager;
 import net.midget807.smollib.util.ModTextureIds;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderProgram;
@@ -28,8 +28,8 @@ public class WorldRendererListener {
             Camera camera = context.camera();
 
             if (world != null) {
-                SquareRendererManager.tick();
-                SquareRendererManager.get().forEach(squareRender -> renderSquare(context, world, client, camera, squareRender));
+                TexturedSquareRendererManager.tick();
+                TexturedSquareRendererManager.get().forEach(texturedSquareRender -> renderSquare(context, world, client, camera, texturedSquareRender));
                 CubeRendererManager.tick();
                 CubeRendererManager.get().forEach(cubeRender -> renderCube(context, world, client, camera, cubeRender));
                 renderTest(context, world, client, camera);
@@ -169,7 +169,7 @@ public class WorldRendererListener {
         }
     }
 
-    private static void renderSquare(WorldRenderContext context, ClientWorld world, MinecraftClient client, Camera camera, SquareRender square) {
+    private static void renderSquare(WorldRenderContext context, ClientWorld world, MinecraftClient client, Camera camera, TexturedSquareRender square) {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferBuilder = tessellator.getBuffer();
         double viewDistance = client.options.getClampedViewDistance() * 16;
@@ -186,10 +186,10 @@ public class WorldRendererListener {
             RenderSystem.enableBlend();
             RenderSystem.enableDepthTest();
 
-            if (SquareRendererManager.squareBuffer != null) {
-                SquareRendererManager.squareBuffer.close();
+            if (TexturedSquareRendererManager.squareBuffer != null) {
+                TexturedSquareRendererManager.squareBuffer.close();
             }
-            SquareRendererManager.squareBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+            TexturedSquareRendererManager.squareBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 
             bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 
@@ -204,28 +204,28 @@ public class WorldRendererListener {
             float zIterator = (MathHelper.floor(smallestZ) & 1) * 0.5f;
 
             switch (square.direction) {
-                case EAST: {
-                    for (double i = square.getDownEdge(); i < square.getUpEdge(); i += square.textureSize) {
-                        double yRemainder = Math.min(square.textureSize, square.getUpEdge() - i);
+                case EAST, WEST: {
+                    for (double i = square.getNorthEdge(); i < square.getSouthEdge(); i += square.textureSize) {
+                        double zRemainder = Math.min(square.textureSize, square.getSouthEdge() - i);
                         float uRemainder = 1.0f;
-                        if (square.getUpEdge() - i < square.textureSize) {
-                            uRemainder = (float) ((square.getUpEdge() - i) / square.textureSize);
+                        if (square.getSouthEdge() - i < square.textureSize) {
+                            uRemainder = (float) ((square.getSouthEdge() - i) / square.textureSize);
                         }
-                        for (double j = square.getNorthEdge(); j < square.getSouthEdge(); j += square.textureSize) {
-                            double zRemainder = Math.min(square.textureSize, square.getSouthEdge() - j);
+                        for (double j = square.getDownEdge(); j < square.getUpEdge(); j += square.textureSize) {
+                            double yRemainder = Math.min(square.textureSize, square.getUpEdge() - j);
                             float vRemainder = 1.0f;
-                            if (square.getSouthEdge() - j < square.textureSize) {
-                                vRemainder = (float) ((square.getSouthEdge() - j) / square.textureSize);
+                            if (square.getUpEdge() - j < square.textureSize) {
+                                vRemainder = (float) ((square.getUpEdge() - j) / square.textureSize);
                             }
-                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (i + yRemainder - camY), (float) (j - camZ)).texture(uRemainder, 0).next();
-                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (i - camY), (float) (j - camZ)).texture(uRemainder, vRemainder).next();
-                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (i - camY), (float) (j + zRemainder - camZ)).texture(0, vRemainder).next();
-                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (i + yRemainder - camY), (float) (j + zRemainder - camZ)).texture(0, 0).next();
+                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (j + yRemainder - camY), (float) (i - camZ)).texture(uRemainder, 0).next();
+                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (j - camY), (float) (i - camZ)).texture(uRemainder, vRemainder).next();
+                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (j - camY), (float) (i + zRemainder - camZ)).texture(0, vRemainder).next();
+                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (j + yRemainder - camY), (float) (i + zRemainder - camZ)).texture(0, 0).next();//todo map uv so the edges line up instead of snapping to end
                         }
                     }
                     break;
                 }
-                case WEST: {
+                case UP, DOWN: {
                     for (double i = square.getWestEdge(); i < square.getEastEdge(); i += square.textureSize) {
                         double xRemainder = Math.min(square.textureSize, square.getEastEdge() - i);
                         float uRemainder = 1.0f;
@@ -244,38 +244,6 @@ public class WorldRendererListener {
                             bufferBuilder.vertex(transformation, (float) (i - camX), (float) (square.getCenterY() - camY), (float) (j + zRemainder - camZ)).texture(0, vRemainder).next();
                         }
                     }
-                    bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getUpEdge() - camY), (float) (square.getSouthEdge() - camZ)).texture(1, 0).next();
-                    bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getDownEdge() - camY), (float) (square.getSouthEdge() - camZ)).texture(1, 1).next();
-                    bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getDownEdge() - camY), (float) (square.getNorthEdge() - camZ)).texture(0, 1).next();
-                    bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (square.getUpEdge() - camY), (float) (square.getNorthEdge() - camZ)).texture(0, 0).next();
-                    break;
-                }
-                case UP: {
-                    for (double i = square.getWestEdge(); i < square.getEastEdge(); i += square.textureSize) {
-                        double xRemainder = Math.min(square.textureSize, square.getEastEdge() - i);
-                        float uRemainder = 1.0f;
-                        if (square.getEastEdge() - i < square.textureSize) {
-                            uRemainder = (float) ((square.getEastEdge() - i) / square.textureSize);
-                        }
-                        for (double j = square.getNorthEdge(); j < square.getSouthEdge(); j += square.textureSize) {
-                            double zRemainder = Math.min(square.textureSize, square.getSouthEdge() - j);
-                            float vRemainder = 1.0f;
-                            if (square.getSouthEdge() - j < square.textureSize) {
-                                vRemainder = (float) ((square.getSouthEdge() - j) / square.textureSize);
-                            }
-                            bufferBuilder.vertex(transformation, (float) (i - camX), (float) (square.getCenterY() - camY), (float) (j - camZ)).texture(0, 0).next();
-                            bufferBuilder.vertex(transformation, (float) (i + xRemainder - camX), (float) (square.getCenterY() - camY), (float) (j - camZ)).texture(uRemainder, 0).next();
-                            bufferBuilder.vertex(transformation, (float) (i + xRemainder - camX), (float) (square.getCenterY() - camY), (float) (j + zRemainder - camZ)).texture(uRemainder, vRemainder).next();
-                            bufferBuilder.vertex(transformation, (float) (i - camX), (float) (square.getCenterY() - camY), (float) (j + zRemainder - camZ)).texture(0, vRemainder).next();
-                        }
-                    }
-                    break;
-                }
-                case DOWN: {
-                    bufferBuilder.vertex(transformation, (float) (square.getEastEdge() - camX), (float) (square.getCenterY() - camY), (float) (square.getNorthEdge() - camZ)).texture(0, 0).next();
-                    bufferBuilder.vertex(transformation, (float) (square.getWestEdge() - camX), (float) (square.getCenterY() - camY), (float) (square.getNorthEdge() - camZ)).texture(1, 0).next();
-                    bufferBuilder.vertex(transformation, (float) (square.getWestEdge() - camX), (float) (square.getCenterY() - camY), (float) (square.getSouthEdge() - camZ)).texture(1, 1).next();
-                    bufferBuilder.vertex(transformation, (float) (square.getEastEdge() - camX), (float) (square.getCenterY() - camY), (float) (square.getSouthEdge() - camZ)).texture(0, 1).next();
                     break;
                 }
                 case NORTH: {
@@ -298,21 +266,21 @@ public class WorldRendererListener {
             }
 
             BufferBuilder.BuiltBuffer builtBuffer = bufferBuilder.end();
-            SquareRendererManager.squareBuffer.bind();
-            SquareRendererManager.squareBuffer.upload(builtBuffer);
+            TexturedSquareRendererManager.squareBuffer.bind();
+            TexturedSquareRendererManager.squareBuffer.upload(builtBuffer);
             VertexBuffer.unbind();
 
             RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-            /** Bit shifting hex colors into that fuckass 256^3 ratio */
+            /* Bit shifting hex colors into that fuckass 256^3 ratio */
             float r = (square.color >> 16 & 0xFF) / 255.0f;
             float g = (square.color >> 8 & 0xFF) / 255.0f;
             float b = (square.color & 0xFF) / 255.0f;
             RenderSystem.setShaderColor(r, g, b, 1.0f);
             RenderSystem.setShaderTexture(0, ModTextureIds.DEBUG);
-            if (SquareRendererManager.squareBuffer != null) {
-                SquareRendererManager.squareBuffer.bind();
+            if (TexturedSquareRendererManager.squareBuffer != null) {
+                TexturedSquareRendererManager.squareBuffer.bind();
                 ShaderProgram shaderProgram = RenderSystem.getShader();
-                SquareRendererManager.squareBuffer.draw(RenderSystem.getModelViewStack().peek().getPositionMatrix(), RenderSystem.getProjectionMatrix(), shaderProgram);
+                TexturedSquareRendererManager.squareBuffer.draw(RenderSystem.getModelViewStack().peek().getPositionMatrix(), RenderSystem.getProjectionMatrix(), shaderProgram);
             }
 
             RenderSystem.enableCull();
@@ -324,13 +292,13 @@ public class WorldRendererListener {
 
 
 
-    private static boolean isNotBeyondRenderDistance(Camera camera, SquareRender squareRender, double clampedViewDistance) {
-        return !(camera.getPos().x < squareRender.getEastEdge() - clampedViewDistance)
-                || !(camera.getPos().x > squareRender.getWestEdge() + clampedViewDistance)
-                || !(camera.getPos().z < squareRender.getSouthEdge() - clampedViewDistance)
-                || !(camera.getPos().z > squareRender.getNorthEdge() + clampedViewDistance)
-                || !(camera.getPos().y < squareRender.getUpEdge() - clampedViewDistance)
-                || !(camera.getPos().y > squareRender.getDownEdge() + clampedViewDistance);
+    private static boolean isNotBeyondRenderDistance(Camera camera, TexturedSquareRender texturedSquareRender, double clampedViewDistance) {
+        return !(camera.getPos().x < texturedSquareRender.getEastEdge() - clampedViewDistance)
+                || !(camera.getPos().x > texturedSquareRender.getWestEdge() + clampedViewDistance)
+                || !(camera.getPos().z < texturedSquareRender.getSouthEdge() - clampedViewDistance)
+                || !(camera.getPos().z > texturedSquareRender.getNorthEdge() + clampedViewDistance)
+                || !(camera.getPos().y < texturedSquareRender.getUpEdge() - clampedViewDistance)
+                || !(camera.getPos().y > texturedSquareRender.getDownEdge() + clampedViewDistance);
     }
 
     private static boolean isNotBeyondRenderDistance(Camera camera, CubeRender cubeRender, double clampedViewDistance) {

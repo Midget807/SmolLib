@@ -4,7 +4,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
-public class SquareRender {
+public class TexturedSquareRender {
     public static final int MAX_RADIUS = 29999984;
     public final Vec3d origin;
     public final Direction direction;
@@ -19,7 +19,7 @@ public class SquareRender {
     /** If {@link #maxAge} equals -1, {@link #age} will not tick.
      *
      */
-    public SquareRender(Vec3d origin, Direction direction, int maxAge, int size, int color, float textureSize, float animationAngle) {
+    public TexturedSquareRender(Vec3d origin, Direction direction, int maxAge, int size, int color, float textureSize, float animationAngle) {
         this.origin = origin;
         this.direction = direction;
         this.size = size;
@@ -30,7 +30,7 @@ public class SquareRender {
         this.age = 0;
         this.maxAge = maxAge;
     }
-    public SquareRender(Vec3d origin, Direction direction, int maxAge, int size, int color, float textureSize) {
+    public TexturedSquareRender(Vec3d origin, Direction direction, int maxAge, int size, int color, float textureSize) {
         this.origin = origin;
         this.direction = direction;
         this.size = size;
