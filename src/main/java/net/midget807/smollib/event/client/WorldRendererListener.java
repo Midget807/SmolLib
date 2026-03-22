@@ -217,10 +217,10 @@ public class WorldRendererListener {
                             if (square.getUpEdge() - j < square.textureSize) {
                                 vRemainder = (float) ((square.getUpEdge() - j) / square.textureSize);
                             }
-                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (j + yRemainder - camY), (float) (i - camZ)).texture(uRemainder, 0).next();
-                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (j - camY), (float) (i - camZ)).texture(uRemainder, vRemainder).next();
-                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (j - camY), (float) (i + zRemainder - camZ)).texture(0, vRemainder).next();
-                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (j + yRemainder - camY), (float) (i + zRemainder - camZ)).texture(0, 0).next();//todo map uv so the edges line up instead of snapping to end
+                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (j + yRemainder - camY), (float) (i + zRemainder - camZ)).texture(uRemainder, vRemainder).next();
+                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (j + yRemainder - camY), (float) (i - camZ)).texture(0, vRemainder).next();
+                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (j - camY), (float) (i - camZ)).texture(0, 0).next();
+                            bufferBuilder.vertex(transformation, (float) (square.getCenterX() - camX), (float) (j - camY), (float) (i + zRemainder - camZ)).texture(uRemainder, 0).next();
                         }
                     }
                     break;
