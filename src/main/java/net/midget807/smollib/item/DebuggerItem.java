@@ -38,8 +38,8 @@ public class DebuggerItem extends Item {
                 Vec3d square3Origin = origin.add(0, 8, 0);
                 //ShapeRenderer.renderTexturedSquare(square2Origin, Direction.UP, 200, 4, 0xff0000, 3.0f);
                 //ShapeRenderer.renderTexturedSquare(square2Origin, Direction.EAST, 200, 4, 0xff0000, 3.0f);
-                ShapeRenderer.renderTexturedSquare(square1Origin, Direction.WEST, 200, 4, 0xff0000, 3.0f);
-                ShapeRenderer.renderTexturedSquare(square3Origin, Direction.DOWN, 200, 4, 0xff0000, 2.0f, 45.0f);
+                ShapeRenderer.renderTexturedSquare(square1Origin, Direction.NORTH, 200, 4, 0xff0000, 3.0f);
+                ShapeRenderer.renderTexturedSquare(square3Origin, Direction.DOWN, 200, 4, 0xff0000, 3.0f, 45.0f);
                 ShapeRenderer.renderCube(origin, 200, 4, 0xff0000);
                 return TypedActionResult.success(itemStack);
             } else {
