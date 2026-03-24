@@ -1,8 +1,10 @@
 package net.midget807.smollib.item;
 
 import net.midget807.smollib.rendering.ShapeRenderer;
+import net.midget807.smollib.rendering.TexturedCircleRender;
 import net.midget807.smollib.rendering.TexturedSquareRender;
 import net.midget807.smollib.rendering.manager.CubeRendererManager;
+import net.midget807.smollib.rendering.manager.TexturedCircleRendererManager;
 import net.midget807.smollib.rendering.manager.TexturedSquareRendererManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
@@ -43,9 +45,13 @@ public class DebuggerItem extends Item {
                 Vec3d square1Origin = origin.add(0, 4, 0);
                 Vec3d square2Origin = origin.add(0, 6, 0);
                 Vec3d square3Origin = origin.add(0, 8, 0);
-                TexturedSquareRender texturedSquareRender = new TexturedSquareRender(origin, Direction.UP, 200, 4, 0x0000ff, 3.0f);
+                /*TexturedSquareRender texturedSquareRender = new TexturedSquareRender(origin, Direction.UP, 200, 4, 0x0000ff, 3.0f);
                 texturedSquareRender.addTransformation(RotationAxis.NEGATIVE_X.rotationDegrees(45));
-                TexturedSquareRendererManager.add(texturedSquareRender);
+                TexturedSquareRendererManager.add(texturedSquareRender);*/
+
+                TexturedCircleRender texturedCircleRender = new TexturedCircleRender(origin, 200, 4, 1.0, 0x00ff00);
+                TexturedCircleRendererManager.add(texturedCircleRender);
+
                 return TypedActionResult.success(itemStack);
             } else {
 
@@ -59,7 +65,7 @@ public class DebuggerItem extends Item {
         super.inventoryTick(stack, world, entity, slot, selected);
         if (entity instanceof PlayerEntity player) {
             //player.sendMessage(Text.literal("No. shape: " + SquareRendererManager.get().size()), true);
-            player.sendMessage(Text.literal("No. shape: " + CubeRendererManager.get().size()), true);
+            player.sendMessage(Text.literal("No. shape: " + TexturedCircleRendererManager.get().size()), true);
         }
     }
 

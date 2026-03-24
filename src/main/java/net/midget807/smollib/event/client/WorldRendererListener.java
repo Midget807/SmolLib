@@ -4,8 +4,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.midget807.smollib.rendering.CubeRender;
+import net.midget807.smollib.rendering.TexturedCircleRender;
 import net.midget807.smollib.rendering.TexturedSquareRender;
 import net.midget807.smollib.rendering.manager.CubeRendererManager;
+import net.midget807.smollib.rendering.manager.TexturedCircleRendererManager;
 import net.midget807.smollib.rendering.manager.TexturedSquareRendererManager;
 import net.midget807.smollib.util.ModTextureIds;
 import net.minecraft.client.MinecraftClient;
@@ -35,9 +37,110 @@ public class WorldRendererListener {
                 TexturedSquareRendererManager.get().forEach(texturedSquareRender -> renderSquare(context, world, client, camera, texturedSquareRender));
                 CubeRendererManager.tick();
                 CubeRendererManager.get().forEach(cubeRender -> renderCube(context, world, client, camera, cubeRender));
-                renderTest(context, world, client, camera);
+
+                TexturedCircleRendererManager.tick();
+                TexturedCircleRendererManager.get().forEach(texturedCircleRender -> renderCircle(context, world, client, camera, texturedCircleRender));
+
+                //renderTest(context, world, client, camera);
             }
         });
+    }
+
+    private static void renderCircle(WorldRenderContext context, ClientWorld world, MinecraftClient client, Camera camera, TexturedCircleRender circle) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        double viewDistance = client.options.getClampedViewDistance() * 16;
+
+        double camX = context.camera().getPos().x;
+        double camY = context.camera().getPos().y;
+        double camZ = context.camera().getPos().z;
+
+        MatrixStack matrices = context.matrixStack();
+        matrices.push();
+
+        // Shifts teh matrix to the local pos of the square
+        matrices.translate(-camX, -camY, -camZ);
+        matrices.translate(circle.getCentreX(), circle.getCentreY(), circle.getCentreZ());
+
+        // Applies transformations
+        circle.TRANSFORMATIONS.forEach(matrices::multiply);
+
+        Matrix4f transformation = matrices.peek().getPositionMatrix();
+
+        // Shifts the matrix back to global pos so the vertices aren't fucked
+        matrices.translate(-circle.getCentreX(), -circle.getCentreY(), -circle.getCentreZ());
+        matrices.translate(camX, camY, camZ);
+
+        if (isNotBeyondRenderDistance(camera, circle, viewDistance)) {
+            RenderSystem.disableCull();
+            RenderSystem.enableBlend();
+            RenderSystem.enableDepthTest();
+
+            if (TexturedCircleRendererManager.circleBuffer != null) {
+                TexturedCircleRendererManager.circleBuffer.close();
+            }
+            TexturedCircleRendererManager.circleBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+
+            bufferbuilder.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_TEXTURE);
+
+            //todo vertices
+            final double forAngleDelta = (float) (Math.PI / 200);
+            for (double theta = 0; theta < Math.PI * 2; theta += forAngleDelta) {
+                double phi = theta + forAngleDelta;
+                double sinT = Math.sin(theta);
+                double cosT =  Math.cos(theta);
+                double sinP = Math.sin(phi);
+                double cosP =  Math.cos(phi);
+                double sinTCenter = Math.sin(theta);
+                double cosTCenter =  Math.cos(theta);
+                double sinPCenter = Math.sin(phi);
+                double cosPCenter =  Math.cos(phi);
+
+                double outerSinT = sinT * circle.getRadius();
+                double outerSinP = sinP * circle.getRadius();
+                double innerSinT = sinT * circle.centerOffset;
+                double innerSinP = sinP * circle.centerOffset;
+                double outerCosT = cosT * circle.getRadius();
+                double outerCosP = cosP * circle.getRadius();
+                double innerCosT = cosT * circle.centerOffset;
+                double innerCosP = cosP * circle.centerOffset;
+
+                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinT - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosT - camZ)).texture(0, 1).next();
+                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinT - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosT - camZ)).texture(1, 1).next();
+                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosP - camZ)).texture(1, 0).next();
+
+                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinT - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosT - camZ)).texture(0, 1).next();
+                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosP - camZ)).texture(1, 1).next();
+                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosP - camZ)).texture(1, 0).next();
+            }
+
+            matrices.pop();
+
+            BufferBuilder.BuiltBuffer builtBuffer = bufferbuilder.end();
+            TexturedCircleRendererManager.circleBuffer.bind();
+            TexturedCircleRendererManager.circleBuffer.upload(builtBuffer);
+            VertexBuffer.unbind();
+
+            RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+            /* Bit shifting hex colors into that fuckass 256^3 ratio */
+            float r = (circle.color >> 16 & 0xFF) / 255.0f;
+            float g = (circle.color >> 8 & 0xFF) / 255.0f;
+            float b = (circle.color & 0xFF) / 255.0f;
+            RenderSystem.setShaderColor(r, g, b, 1.0f);
+            RenderSystem.setShaderTexture(0, ModTextureIds.DEBUG_SOLID);
+            if (TexturedCircleRendererManager.circleBuffer != null) {
+                TexturedCircleRendererManager.circleBuffer.bind();
+                ShaderProgram shaderProgram = RenderSystem.getShader();
+                Matrix4f positionMatrix = RenderSystem.getModelViewStack().peek().getPositionMatrix();
+
+                TexturedCircleRendererManager.circleBuffer.draw(positionMatrix, RenderSystem.getProjectionMatrix(), shaderProgram);
+            }
+
+            RenderSystem.enableCull();
+            RenderSystem.disableBlend();
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        }
     }
 
     private static void renderTest(WorldRenderContext context, ClientWorld world, MinecraftClient client, Camera camera) {
@@ -317,6 +420,15 @@ public class WorldRendererListener {
     }
 
 
+
+    private static boolean isNotBeyondRenderDistance(Camera camera, TexturedCircleRender shape, double clampedViewDistance) {
+        return !(camera.getPos().x < shape.getEastPoint() - clampedViewDistance)
+                || !(camera.getPos().x > shape.getWestPoint() + clampedViewDistance)
+                || !(camera.getPos().z < shape.getSouthPoint() - clampedViewDistance)
+                || !(camera.getPos().z > shape.getNorthPoint() + clampedViewDistance)
+                || !(camera.getPos().y < shape.getUpPoint() - clampedViewDistance)
+                || !(camera.getPos().y > shape.getDownPoint() + clampedViewDistance);
+    }
 
     private static boolean isNotBeyondRenderDistance(Camera camera, TexturedSquareRender texturedSquareRender, double clampedViewDistance) {
         return !(camera.getPos().x < texturedSquareRender.getEastEdge() - clampedViewDistance)
