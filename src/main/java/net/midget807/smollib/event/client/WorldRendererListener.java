@@ -12,10 +12,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.*;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 
 public class WorldRendererListener {
     @Nullable
@@ -178,7 +181,22 @@ public class WorldRendererListener {
         double camY = context.camera().getPos().y;
         double camZ = context.camera().getPos().z;
 
-        Matrix4f transformation = context.matrixStack().peek().getPositionMatrix();
+        MatrixStack matrices = context.matrixStack();
+        matrices.push();
+
+        // Shifts teh matrix to the local pos of the square
+        matrices.translate(-camX, -camY, -camZ);
+        matrices.translate(square.getCenterX(), square.getCenterY(), square.getCenterZ());
+
+        // Applies transformations
+        square.TRANSFORMATIONS.forEach(matrices::multiply);
+
+        Matrix4f transformation = matrices.peek().getPositionMatrix();
+
+        // Shifts the matrix back to global pos so the vertices aren't fucked
+        matrices.translate(-square.getCenterX(), -square.getCenterY(), -square.getCenterZ());
+        matrices.translate(camX, camY, camZ);
+
 
         if (isNotBeyondRenderDistance(camera, square, viewDistance)) {
 
@@ -269,6 +287,8 @@ public class WorldRendererListener {
                 }
             }
 
+            matrices.pop();
+
             BufferBuilder.BuiltBuffer builtBuffer = bufferBuilder.end();
             TexturedSquareRendererManager.squareBuffer.bind();
             TexturedSquareRendererManager.squareBuffer.upload(builtBuffer);
@@ -278,13 +298,15 @@ public class WorldRendererListener {
             /* Bit shifting hex colors into that fuckass 256^3 ratio */
             float r = (square.color >> 16 & 0xFF) / 255.0f;
             float g = (square.color >> 8 & 0xFF) / 255.0f;
-            float b = (square.color & 0xFF) / 255.0f;
+            float b = (square.color >> 0 & 0xFF) / 255.0f;
             RenderSystem.setShaderColor(r, g, b, 1.0f);
             RenderSystem.setShaderTexture(0, ModTextureIds.DEBUG);
             if (TexturedSquareRendererManager.squareBuffer != null) {
                 TexturedSquareRendererManager.squareBuffer.bind();
                 ShaderProgram shaderProgram = RenderSystem.getShader();
-                TexturedSquareRendererManager.squareBuffer.draw(RenderSystem.getModelViewStack().peek().getPositionMatrix(), RenderSystem.getProjectionMatrix(), shaderProgram);
+                Matrix4f positionMatrix = RenderSystem.getModelViewStack().peek().getPositionMatrix();
+
+                TexturedSquareRendererManager.squareBuffer.draw(positionMatrix, RenderSystem.getProjectionMatrix(), shaderProgram);
             }
 
             RenderSystem.enableCull();

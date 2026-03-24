@@ -1,8 +1,13 @@
 package net.midget807.smollib.rendering;
 
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Quaternionf;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TexturedSquareRender {
     public static final int MAX_RADIUS = 29999984;
@@ -15,6 +20,7 @@ public class TexturedSquareRender {
     public final float textureSize;
     public final boolean animated;
     public final float animationAngle;
+    public List<Quaternionf> TRANSFORMATIONS = new ArrayList<>();
 
     /** If {@link #maxAge} equals -1, {@link #age} will not tick.
      *
@@ -93,5 +99,14 @@ public class TexturedSquareRender {
         check = Math.min(check, dzp);
         check = Math.min(check, dyn);
         return Math.min(check, dzp);
+    }
+
+    /**
+     * Transformations (rotations) are handled in the order they are added.
+     * <br>
+     * Use {@link net.minecraft.util.math.RotationAxis} class to create the necessary {@link Quaternionf}.
+     * */
+    public void addTransformation(Quaternionf rotation) {
+        this.TRANSFORMATIONS.add(rotation);
     }
 }

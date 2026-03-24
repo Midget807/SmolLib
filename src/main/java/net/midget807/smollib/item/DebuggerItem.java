@@ -1,7 +1,11 @@
 package net.midget807.smollib.item;
 
 import net.midget807.smollib.rendering.ShapeRenderer;
+import net.midget807.smollib.rendering.TexturedSquareRender;
 import net.midget807.smollib.rendering.manager.CubeRendererManager;
+import net.midget807.smollib.rendering.manager.TexturedSquareRendererManager;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -10,8 +14,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 
 public class DebuggerItem extends Item {
     public DebuggerItem(Settings settings) {
@@ -36,11 +43,9 @@ public class DebuggerItem extends Item {
                 Vec3d square1Origin = origin.add(0, 4, 0);
                 Vec3d square2Origin = origin.add(0, 6, 0);
                 Vec3d square3Origin = origin.add(0, 8, 0);
-                //ShapeRenderer.renderTexturedSquare(square2Origin, Direction.UP, 200, 4, 0xff0000, 3.0f);
-                //ShapeRenderer.renderTexturedSquare(square2Origin, Direction.EAST, 200, 4, 0xff0000, 3.0f);
-                ShapeRenderer.renderTexturedSquare(square1Origin, Direction.NORTH, 200, 4, 0xff0000, 3.0f);
-                ShapeRenderer.renderTexturedSquare(square3Origin, Direction.DOWN, 200, 4, 0xff0000, 3.0f, 45.0f);
-                ShapeRenderer.renderCube(origin, 200, 4, 0xff0000);
+                TexturedSquareRender texturedSquareRender = new TexturedSquareRender(origin, Direction.EAST, 200, 4, 0x0000ff, 3.0f);
+                texturedSquareRender.addTransformation(RotationAxis.NEGATIVE_X.rotationDegrees(45));
+                TexturedSquareRendererManager.add(texturedSquareRender);
                 return TypedActionResult.success(itemStack);
             } else {
 
