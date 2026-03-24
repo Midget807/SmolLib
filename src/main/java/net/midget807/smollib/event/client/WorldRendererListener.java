@@ -298,7 +298,7 @@ public class WorldRendererListener {
             /* Bit shifting hex colors into that fuckass 256^3 ratio */
             float r = (square.color >> 16 & 0xFF) / 255.0f;
             float g = (square.color >> 8 & 0xFF) / 255.0f;
-            float b = (square.color >> 0 & 0xFF) / 255.0f;
+            float b = (square.color & 0xFF) / 255.0f;
             RenderSystem.setShaderColor(r, g, b, 1.0f);
             RenderSystem.setShaderTexture(0, ModTextureIds.DEBUG);
             if (TexturedSquareRendererManager.squareBuffer != null) {

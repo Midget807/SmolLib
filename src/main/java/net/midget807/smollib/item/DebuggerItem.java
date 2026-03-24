@@ -43,7 +43,7 @@ public class DebuggerItem extends Item {
                 Vec3d square1Origin = origin.add(0, 4, 0);
                 Vec3d square2Origin = origin.add(0, 6, 0);
                 Vec3d square3Origin = origin.add(0, 8, 0);
-                TexturedSquareRender texturedSquareRender = new TexturedSquareRender(origin, Direction.EAST, 200, 4, 0x0000ff, 3.0f);
+                TexturedSquareRender texturedSquareRender = new TexturedSquareRender(origin, Direction.UP, 200, 4, 0x0000ff, 3.0f);
                 texturedSquareRender.addTransformation(RotationAxis.NEGATIVE_X.rotationDegrees(45));
                 TexturedSquareRendererManager.add(texturedSquareRender);
                 return TypedActionResult.success(itemStack);

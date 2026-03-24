@@ -1,8 +1,8 @@
 package net.midget807.smollib.rendering;
 
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Quaternionf;
 
@@ -104,7 +104,10 @@ public class TexturedSquareRender {
     /**
      * Transformations (rotations) are handled in the order they are added.
      * <br>
-     * Use {@link net.minecraft.util.math.RotationAxis} class to create the necessary {@link Quaternionf}.
+     * Use {@link RotationAxis} class to create the necessary {@link Quaternionf}.
+     * <br>
+     * <br>
+     * Note that {@link RotationAxis} is for global cardinal axes.
      * */
     public void addTransformation(Quaternionf rotation) {
         this.TRANSFORMATIONS.add(rotation);
