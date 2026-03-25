@@ -50,7 +50,9 @@ public class DebuggerItem extends Item {
                 TexturedSquareRendererManager.add(texturedSquareRender);*/
 
                 TexturedCircleRender texturedCircleRender = new TexturedCircleRender(origin, 200, 4, 1.0, 0x00ff00);
+                TexturedCircleRender texturedCircleRender2 = new TexturedCircleRender(square1Origin, 200, 4, 0.0, 0x00ff00);
                 TexturedCircleRendererManager.add(texturedCircleRender);
+                TexturedCircleRendererManager.add(texturedCircleRender2);
 
                 return TypedActionResult.success(itemStack);
             } else {

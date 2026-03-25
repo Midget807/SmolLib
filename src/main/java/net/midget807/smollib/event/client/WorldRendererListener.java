@@ -109,9 +109,11 @@ public class WorldRendererListener {
                 bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinT - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosT - camZ)).texture(1, 1).next();
                 bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosP - camZ)).texture(1, 0).next();
 
-                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinT - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosT - camZ)).texture(0, 1).next();
-                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosP - camZ)).texture(1, 1).next();
-                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosP - camZ)).texture(1, 0).next();
+                if (circle.centerOffset > 0.0) {
+                    bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinT - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosT - camZ)).texture(0, 1).next();
+                    bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosP - camZ)).texture(1, 1).next();
+                    bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosP - camZ)).texture(1, 0).next();
+                }
             }
 
             matrices.pop();
