@@ -51,6 +51,8 @@ public class DebuggerItem extends Item {
 
                 TexturedCircleRender texturedCircleRender = new TexturedCircleRender(origin, 200, 4, 1.0, 0x00ff00);
                 TexturedCircleRender texturedCircleRender2 = new TexturedCircleRender(square1Origin, 200, 4, 0.0, 0x00ff00);
+                texturedCircleRender2.addTransformation(RotationAxis.POSITIVE_X.rotationDegrees(45));
+                texturedCircleRender2.addTickTransformations(RotationAxis.POSITIVE_Y.rotationDegrees(1));
                 TexturedCircleRendererManager.add(texturedCircleRender);
                 TexturedCircleRendererManager.add(texturedCircleRender2);
 

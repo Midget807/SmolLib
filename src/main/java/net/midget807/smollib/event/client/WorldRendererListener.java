@@ -55,10 +55,12 @@ public class WorldRendererListener {
         double camY = context.camera().getPos().y;
         double camZ = context.camera().getPos().z;
 
+        circle.getTickTransformations().forEach((quaternionf, radians) -> circle.addTransformation(quaternionf));
+
         MatrixStack matrices = context.matrixStack();
         matrices.push();
 
-        // Shifts teh matrix to the local pos of the square
+        // Shifts the matrix to the local pos of the square
         matrices.translate(-camX, -camY, -camZ);
         matrices.translate(circle.getCentreX(), circle.getCentreY(), circle.getCentreZ());
 
@@ -296,7 +298,7 @@ public class WorldRendererListener {
         MatrixStack matrices = context.matrixStack();
         matrices.push();
 
-        // Shifts teh matrix to the local pos of the square
+        // Shifts the matrix to the local pos of the square
         matrices.translate(-camX, -camY, -camZ);
         matrices.translate(square.getCenterX(), square.getCenterY(), square.getCenterZ());
 

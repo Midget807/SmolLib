@@ -6,7 +6,9 @@ import net.minecraft.util.math.Vec3d;
 import org.joml.Quaternionf;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TexturedCircleRender {
     public static final int MAX_RADIUS = 29999984;
@@ -17,6 +19,7 @@ public class TexturedCircleRender {
     public final double centerOffset;
     public final int color;
     public List<Quaternionf> TRANSFORMATIONS = new ArrayList<>();
+    public Map<Quaternionf, Float> TICK_TRANSFORMATIONS = new HashMap<>();
 
     /**
      * @param maxAge If {@link #maxAge} equals -1, {@link #age} will not tick.<br>
@@ -87,5 +90,12 @@ public class TexturedCircleRender {
      * */
     public void addTransformation(Quaternionf rotation) {
         this.TRANSFORMATIONS.add(rotation);
+    }
+
+    public void addTickTransformations(Quaternionf rotation) {
+        this.TICK_TRANSFORMATIONS.put(rotation, rotation.angle());
+    }
+    public Map<Quaternionf, Float> getTickTransformations() {
+        return this.TICK_TRANSFORMATIONS;
     }
 }
