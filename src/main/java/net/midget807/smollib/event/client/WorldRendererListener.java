@@ -83,7 +83,6 @@ public class WorldRendererListener {
 
             bufferbuilder.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_TEXTURE);
 
-            //todo vertices
             final double forAngleDelta = (float) (Math.PI / 200);
             for (double theta = 0; theta < Math.PI * 2; theta += forAngleDelta) {
                 double phi = theta + forAngleDelta;
@@ -91,10 +90,6 @@ public class WorldRendererListener {
                 double cosT =  Math.cos(theta);
                 double sinP = Math.sin(phi);
                 double cosP =  Math.cos(phi);
-                double sinTCenter = Math.sin(theta);
-                double cosTCenter =  Math.cos(theta);
-                double sinPCenter = Math.sin(phi);
-                double cosPCenter =  Math.cos(phi);
 
                 double outerSinT = sinT * circle.getRadius();
                 double outerSinP = sinP * circle.getRadius();
@@ -105,14 +100,26 @@ public class WorldRendererListener {
                 double innerCosT = cosT * circle.centerOffset;
                 double innerCosP = cosP * circle.centerOffset;
 
-                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinT - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosT - camZ)).texture(0, 1).next();
-                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinT - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosT - camZ)).texture(1, 1).next();
-                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosP - camZ)).texture(1, 0).next();
+                float UV_CENTER = 0.5f;
+
+                float uOuterT = UV_CENTER + (float) (cosT * 0.5f);
+                float vOuterT = UV_CENTER + (float) (sinT * 0.5f);
+                float uOuterP = UV_CENTER + (float) (cosP * 0.5f);
+                float vOuterP = UV_CENTER + (float) (sinP * 0.5f);
+                float uInnerT = UV_CENTER + (float) (innerCosT / circle.size);
+                float vInnerT = UV_CENTER + (float) (innerSinT / circle.size);
+                float uInnerP = UV_CENTER + (float) (innerCosP / circle.size);
+                float vInnerP = UV_CENTER + (float) (innerSinP / circle.size);
+
+
+                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinT - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosT - camZ)).texture(uInnerT, vInnerT).next();
+                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinT - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosT - camZ)).texture(uOuterT, vOuterT).next();
+                bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosP - camZ)).texture(uOuterP, vOuterP).next();
 
                 if (circle.centerOffset > 0.0) {
-                    bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinT - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosT - camZ)).texture(0, 1).next();
-                    bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosP - camZ)).texture(1, 1).next();
-                    bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosP - camZ)).texture(1, 0).next();
+                    bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinT - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosT - camZ)).texture(uInnerT, vInnerT).next();
+                    bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + outerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + outerCosP - camZ)).texture(uOuterP, vOuterP).next();
+                    bufferbuilder.vertex(transformation, (float) (circle.getCentreX() + innerSinP - camX), (float) (circle.getCentreY() - camY), (float) (circle.getCentreZ() + innerCosP - camZ)).texture(uInnerP, vInnerP).next();
                 }
             }
 
@@ -129,7 +136,7 @@ public class WorldRendererListener {
             float g = (circle.color >> 8 & 0xFF) / 255.0f;
             float b = (circle.color & 0xFF) / 255.0f;
             RenderSystem.setShaderColor(r, g, b, 1.0f);
-            RenderSystem.setShaderTexture(0, ModTextureIds.DEBUG_SOLID);
+            RenderSystem.setShaderTexture(0, ModTextureIds.DEBUG);
             if (TexturedCircleRendererManager.circleBuffer != null) {
                 TexturedCircleRendererManager.circleBuffer.bind();
                 ShaderProgram shaderProgram = RenderSystem.getShader();
